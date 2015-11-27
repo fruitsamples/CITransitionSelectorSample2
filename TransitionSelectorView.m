@@ -1,79 +1,58 @@
 /*
-
-File: TransitionSelectorView.m
-
-Abstract:   Scrollable NSOpenGLView subclass that handles
-	    the rendering of the transitions.
-
-Version: <1.1>
-
-© Copyright 2004 Apple Computer, Inc. All rights reserved.
-
-IMPORTANT:  This Apple software is supplied to 
-you by Apple Computer, Inc. ("Apple") in 
-consideration of your agreement to the following 
-terms, and your use, installation, modification 
-or redistribution of this Apple software 
-constitutes acceptance of these terms.  If you do 
-not agree with these terms, please do not use, 
-install, modify or redistribute this Apple 
-software.
-
-In consideration of your agreement to abide by 
-the following terms, and subject to these terms, 
-Apple grants you a personal, non-exclusive 
-license, under Apple's copyrights in this 
-original Apple software (the "Apple Software"), 
-to use, reproduce, modify and redistribute the 
-Apple Software, with or without modifications, in 
-source and/or binary forms; provided that if you 
-redistribute the Apple Software in its entirety 
-and without modifications, you must retain this 
-notice and the following text and disclaimers in 
-all such redistributions of the Apple Software. 
-Neither the name, trademarks, service marks or 
-logos of Apple Computer, Inc. may be used to 
-endorse or promote products derived from the 
-Apple Software without specific prior written 
-permission from Apple.  Except as expressly 
-stated in this notice, no other rights or 
-licenses, express or implied, are granted by 
-Apple herein, including but not limited to any 
-patent rights that may be infringed by your 
-derivative works or by other works in which the 
-Apple Software may be incorporated.
-
-The Apple Software is provided by Apple on an "AS 
-IS" basis.  APPLE MAKES NO WARRANTIES, EXPRESS OR 
-IMPLIED, INCLUDING WITHOUT LIMITATION THE IMPLIED 
-WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY 
-AND FITNESS FOR A PARTICULAR PURPOSE, REGARDING 
-THE APPLE SOFTWARE OR ITS USE AND OPERATION ALONE 
-OR IN COMBINATION WITH YOUR PRODUCTS.
-
-IN NO EVENT SHALL APPLE BE LIABLE FOR ANY 
-SPECIAL, INDIRECT, INCIDENTAL OR CONSEQUENTIAL 
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, 
-PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS 
-OF USE, DATA, OR PROFITS; OR BUSINESS 
-INTERRUPTION) ARISING IN ANY WAY OUT OF THE USE, 
-REPRODUCTION, MODIFICATION AND/OR DISTRIBUTION OF 
-THE APPLE SOFTWARE, HOWEVER CAUSED AND WHETHER 
-UNDER THEORY OF CONTRACT, TORT (INCLUDING 
-NEGLIGENCE), STRICT LIABILITY OR OTHERWISE, EVEN 
-IF APPLE HAS BEEN ADVISED OF THE POSSIBILITY OF 
-SUCH DAMAGE.
-
-*/ 
+     File: TransitionSelectorView.m
+ Abstract: TransitionSelectorView.h
+  Version: 1.2
+ 
+ Disclaimer: IMPORTANT:  This Apple software is supplied to you by Apple
+ Inc. ("Apple") in consideration of your agreement to the following
+ terms, and your use, installation, modification or redistribution of
+ this Apple software constitutes acceptance of these terms.  If you do
+ not agree with these terms, please do not use, install, modify or
+ redistribute this Apple software.
+ 
+ In consideration of your agreement to abide by the following terms, and
+ subject to these terms, Apple grants you a personal, non-exclusive
+ license, under Apple's copyrights in this original Apple software (the
+ "Apple Software"), to use, reproduce, modify and redistribute the Apple
+ Software, with or without modifications, in source and/or binary forms;
+ provided that if you redistribute the Apple Software in its entirety and
+ without modifications, you must retain this notice and the following
+ text and disclaimers in all such redistributions of the Apple Software.
+ Neither the name, trademarks, service marks or logos of Apple Inc. may
+ be used to endorse or promote products derived from the Apple Software
+ without specific prior written permission from Apple.  Except as
+ expressly stated in this notice, no other rights or licenses, express or
+ implied, are granted by Apple herein, including but not limited to any
+ patent rights that may be infringed by your derivative works or by other
+ works in which the Apple Software may be incorporated.
+ 
+ The Apple Software is provided by Apple on an "AS IS" basis.  APPLE
+ MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION
+ THE IMPLIED WARRANTIES OF NON-INFRINGEMENT, MERCHANTABILITY AND FITNESS
+ FOR A PARTICULAR PURPOSE, REGARDING THE APPLE SOFTWARE OR ITS USE AND
+ OPERATION ALONE OR IN COMBINATION WITH YOUR PRODUCTS.
+ 
+ IN NO EVENT SHALL APPLE BE LIABLE FOR ANY SPECIAL, INDIRECT, INCIDENTAL
+ OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ INTERRUPTION) ARISING IN ANY WAY OUT OF THE USE, REPRODUCTION,
+ MODIFICATION AND/OR DISTRIBUTION OF THE APPLE SOFTWARE, HOWEVER CAUSED
+ AND WHETHER UNDER THEORY OF CONTRACT, TORT (INCLUDING NEGLIGENCE),
+ STRICT LIABILITY OR OTHERWISE, EVEN IF APPLE HAS BEEN ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+ 
+ Copyright (C) 2011 Apple Inc. All Rights Reserved.
+ 
+ */
 
 #import <OpenGL/OpenGL.h>
 #import <OpenGL/gl.h>
 #import "TransitionSelectorView.h"
 
-
-
-
 @implementation TransitionSelectorView
+
+@synthesize sourceImage;
+@synthesize targetImage;
 
 + (NSOpenGLPixelFormat *)defaultPixelFormat
 {
@@ -119,11 +98,11 @@ SUCH DAMAGE.
     // setup the source and destination image for the transition
     url   = [NSURL fileURLWithPath: [[NSBundle mainBundle]
         pathForResource: @"Rose" ofType: @"jpg"]];
-    [self setSourceImage: [CIImage imageWithContentsOfURL: url]];
+    self.sourceImage = [CIImage imageWithContentsOfURL: url];
 
     url   = [NSURL fileURLWithPath: [[NSBundle mainBundle]
         pathForResource: @"Frog" ofType: @"jpg"]];
-    [self setTargetImage: [CIImage imageWithContentsOfURL: url]];
+    self.targetImage = [CIImage imageWithContentsOfURL: url];
     
     // setup our transitions
     if(transitions == nil)
@@ -145,7 +124,7 @@ SUCH DAMAGE.
 
 - (void)prepareOpenGL
 {
-    long parm = 1;
+    GLint parm = 1;
 
     /* Enable beam-synced updates. */
 
@@ -171,25 +150,6 @@ SUCH DAMAGE.
 - (void)reshape		// scrolled, moved or resized
 {
     _needsReshape = YES;	// reset the viewport etc. on the next draw
-}
-
-- (void)setSourceImage: (CIImage *)source
-{
-    [source retain];
-    [sourceImage release];
-    sourceImage = source;
-}
-
-- (CIImage *)sourceImage
-{
-	return sourceImage;
-}
-
-- (void)setTargetImage: (CIImage *)target
-{
-    [target retain];
-    [targetImage release];
-    targetImage = target;
 }
 
 // return our static shading image
@@ -287,7 +247,6 @@ SUCH DAMAGE.
     if(_needsReshape)
     {
 	// reset the views coordinate system when the view has been resized or scrolled
-	NSRect	bounds = [self bounds];
 	NSRect  visibleRect = [self visibleRect];
 	NSRect  mappedVisibleRect = NSIntegralRect([self convertRect: visibleRect toView: [self enclosingScrollView]]);
 	
@@ -313,8 +272,7 @@ SUCH DAMAGE.
 	if (pf == nil)
 	    pf = [[self class] defaultPixelFormat];
 
-	_context = [[CIContext contextWithCGLContext: CGLGetCurrentContext()
-		     pixelFormat: [pf CGLPixelFormatObj] options: nil] retain];
+        _context = [[CIContext contextWithCGLContext:CGLGetCurrentContext() pixelFormat:[pf CGLPixelFormatObj] colorSpace:NULL options: nil] retain];
     }
     
     // fill the view black
@@ -336,7 +294,7 @@ SUCH DAMAGE.
 	displayRect.size = thumbFrame.size;
 	displayRect = CGRectIntersection (displayRect, *(CGRect*)&rectangle);
         if((displayRect.size.width > 0) && (displayRect.size.height > 0))	// only draw the transitions that are in the visible area to increase performance
-	    [_context drawImage: [self imageForTransition: i atTime: t]  atPoint: origin  fromRect: thumbFrame];
+            [_context drawImage: [self imageForTransition: i atTime: t]  atPoint: origin  fromRect: thumbFrame];
         origin.x += thumbnailWidth + thumbnailGap;
     }
     
